@@ -1,0 +1,16 @@
+# Mesa schelling model
+# @author Sascha Holzhauer
+
+version: '3'
+services:
+  mesa-schelling:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8521:8521"
+      - "8555:8555" 
+    restart: always
+    environment:
+      URLPATH: mesa-schelling
+      TZ: Europe/Berlin

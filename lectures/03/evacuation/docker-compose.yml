@@ -1,0 +1,15 @@
+# Mesa schelling model
+# @author Sascha Holzhauer
+
+version: '3'
+services:
+  mesa-evacuation:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8522:8522"
+    restart: always
+    environment:
+      URLPATH: mesa-evacuation
+      TZ: Europe/Berlin
