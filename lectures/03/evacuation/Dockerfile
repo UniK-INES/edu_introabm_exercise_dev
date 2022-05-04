@@ -7,9 +7,13 @@ RUN apt-get install git -y
 
 RUN mkdir /mesa
 WORKDIR /mesa
-RUN svn checkout https://github.com/UniK-INES/edu_introabm_exercise_dev/trunk/abmodel
 
-RUN pip install -r ./abmodel/requirements.txt
+ARG FETCH_REQUIRMENTS=2016-01-01
+RUN svn checkout https://github.com/UniK-INES/edu_introabm_exercise_dev/trunk/abmodel
+RUN pip install -r ./abmodel/requirements_abmodel.txt
+
+ARG FETCH_MODEL=FALSE
+RUN svn checkout https://github.com/UniK-INES/edu_introabm_exercise_dev/trunk/abmodel
 #RUN pip install -I git+https://github.com/UniK-INES/mesa@ines_edu
 
 CMD python ./abmodel/run.py
