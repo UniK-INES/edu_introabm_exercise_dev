@@ -7,9 +7,7 @@ license = "GPLv3"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-spyder = "^5.2.2"
 pyinstrument = "^4.1.1"
-jupyterlab = "^3.3.2"
 matplotlib = "^3.5.1"
 numpy = "^1.22.3"
 pandas = "^1.4.2"
@@ -17,14 +15,9 @@ networkx = "^2.7.1"
 Mesa = "^0.9.0"
 
 [tool.poetry.dev-dependencies]
-black = "^21.11b1"
 pydocstyle = "^6.1.1"
 bandit = "^1.7.1"
 line-profiler = "^3.3.1"
-
-[tool.black]
-# Use the more relaxed max line length permitted in PEP8.
-line-length = 99
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

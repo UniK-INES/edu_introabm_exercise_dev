@@ -32,9 +32,11 @@ class FireEvacuation(Model):
         self,
         floor_size: int,
         human_count: int,
-        visualise_vision: bool,
-        random_spawn: bool,
-        save_plots: bool,
+        visualise_vision = False,
+        random_spawn = True,
+        alarm_believers_prop = 0.9,
+        max_speed = 2,
+        seed=1,
      ):
         """
         
@@ -59,6 +61,10 @@ class FireEvacuation(Model):
         None.
 
         """
+        
+        np.random.seed(self._seed)
+        self.rng = np.random.default_rng(self._seed)
+        self.MAX_SPEED = max_speed
         
         # Create floorplan
         floorplan = np.full((floor_size, floor_size), '_')
@@ -86,7 +92,8 @@ class FireEvacuation(Model):
         self.fire_exits: dict[Coordinate, FireExit] = {}
         self.doors: dict[Coordinate, Door] = {}
 
-        # If random spawn is false, spawn_pos_list will contain the list of possible spawn points according to the floorplan
+        # If random spawn is false, spawn_pos_list will contain the list of possible 
+        # spawn points according to the floorplan
         self.random_spawn = random_spawn
         self.spawn_pos_list: list[Coordinate] = []
 
@@ -140,6 +147,7 @@ class FireEvacuation(Model):
                 "Incapacitated": lambda m: self.count_human_mobility(
                     m, Human.Mobility.INCAPACITATED
                 ),
+                "AvgNervousness": lambda m: self.get_human_nervousness(m),
                 "Normal": lambda m: self.count_human_mobility(m, Human.Mobility.NORMAL),
                 "Panic": lambda m: self.count_human_mobility(m, Human.Mobility.PANIC),
              }
@@ -148,19 +156,22 @@ class FireEvacuation(Model):
         # Start placing human agents
         for i in range(0, self.human_count):
             if self.random_spawn:  # Place human agents randomly
-                pos = self.grid.find_empty()
+                # pos = self.grid.find_empty()
+                #print(self.grid.empties)
+                pos = tuple(self.rng.choice(tuple(self.grid.empties)))
+                print(pos )
             else:  # Place human agents at specified spawn locations
-                pos = np.random.choice(self.spawn_pos_list)
+                pos = self.rng.choice(self.spawn_pos_list)
 
             if pos:
                 # Create a random human
-                health = np.random.randint(self.MIN_HEALTH * 100, self.MAX_HEALTH * 100) / 100
-                speed = np.random.randint(self.MIN_SPEED, self.MAX_SPEED)
+                health = self.rng.integers(self.MIN_HEALTH * 100, self.MAX_HEALTH * 100) / 100
+                speed = self.rng.integers(self.MIN_SPEED, self.MAX_SPEED)
 
                 # Vision statistics obtained from http://www.who.int/blindness/GLOBALDATAFINALforweb.pdf
                 vision_distribution = [0.0058, 0.0365, 0.0424, 0.9153]
                 vision = int(
-                    np.random.choice(
+                    self.rng.choice(
                         np.arange(
                             self.MIN_VISION,
                             self.width + 1,
@@ -181,19 +192,21 @@ class FireEvacuation(Model):
                     0.1,
                     0.025,
                     0.025,
-                ]  # Distribution with slight higher weighting for above median nerovusness
+                ]  # Distribution with slight higher weighting for above median nervousness
                 nervousness = int(
-                    np.random.choice(
+                    self.rng.choice(
                         range(self.MIN_NERVOUSNESS, self.MAX_NERVOUSNESS + 1),
                         p=nervousness_distribution,
                     )
                 )  # Random choice starting at 1 and up to and including 10
 
-                experience = np.random.randint(self.MIN_EXPERIENCE, self.MAX_EXPERIENCE)
+                experience = self.rng.integers(self.MIN_EXPERIENCE, self.MAX_EXPERIENCE)
 
-                belief_distribution = [0.9, 0.1]  # [Believes, Doesn't Believe]
-                believes_alarm = np.random.choice([True, False], p=belief_distribution)
+                belief_distribution = [alarm_believers_prop, 1 - prop_alarm_believers_prop]  # [Believes, Doesn't Believe]
+                believes_alarm = self.rng.choice([True, False], p=belief_distribution)
 
+                # decide here whether to add a facilitator
+                
                 human = Human(
                     pos,
                     health=health,
@@ -211,45 +224,6 @@ class FireEvacuation(Model):
                 print("No tile empty for human placement!")
 
         self.running = True
-     
-    # Plots line charts of various statistics from a run
-    def save_figures(self):
-        """
-        
-
-        Returns
-        -------
-        None.
-
-        """
-        DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        OUTPUT_DIR = DIR + "/output"
-
-        results = self.datacollector.get_model_vars_dataframe()
-
-        dpi = 100
-        fig, axes = plt.subplots(figsize=(1920 / dpi, 1080 / dpi), dpi=dpi, nrows=1, ncols=3)
-
-        status_results = results.loc[:, ["Alive","Escaped"]]
-        status_plot = status_results.plot(ax=axes[0])
-        status_plot.set_title("Human Status")
-        status_plot.set_xlabel("Simulation Step")
-        status_plot.set_ylabel("Count")
-
-        mobility_results = results.loc[:, ["Incapacitated", "Normal", "Panic"]]
-        mobility_plot = mobility_results.plot(ax=axes[1])
-        mobility_plot.set_title("Human Mobility")
-        mobility_plot.set_xlabel("Simulation Step")
-        mobility_plot.set_ylabel("Count")
-
-        timestr = time.strftime("%Y%m%d-%H%M%S")
-        plt.suptitle(
-            "Number of Human Agents: "
-            + str(self.human_count),
-            fontsize=16,
-        )
-        plt.savefig(OUTPUT_DIR + "/model_graphs/" + timestr + ".png")
-        plt.close(fig)
 
     def step(self):
         """
@@ -262,14 +236,21 @@ class FireEvacuation(Model):
         # If all agents escaped, stop the model and collect the results
         if self.count_human_status(self, Human.Status.ALIVE) == 0:
             self.running = False
-
-            if self.save_plots:
-                self.save_figures()
                 
     def run(self, n):
         """Run the model for n steps."""
         for _ in range(n):
             self.step()
+       
+    @staticmethod     
+    def get_human_nervousness(model):
+        count = 0
+        nervousness = 0
+        for agent in model.schedule.agents:
+            if isinstance(agent, Human):
+                nervousness += agent.nervousness
+                count +=1
+        return nervousness/count
 
     @staticmethod
     def count_human_status(model, status):

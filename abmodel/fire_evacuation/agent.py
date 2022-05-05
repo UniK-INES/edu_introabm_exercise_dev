@@ -466,6 +466,8 @@ class Human(Agent):
         """
         # Shock will decrease by this amount if no new shock is added
         nervousness_modifier = self.DEFAULT_NERVOUSNESS_MODIFIER
+        
+        # Shock will increase in case of anormal humans visible to the agent
         for _, agents in self.visible_tiles:
             for agent in agents:
                 if isinstance(agent, Human) and agent.get_mobility() != Human.Mobility.NORMAL:
@@ -784,7 +786,7 @@ class Human(Agent):
 
             planned_target_agent = self.planned_target[0]
 
-            # If a fire has started and the agent believes it, attempt to plan 
+            # If the agent believes the alarm, attempt to plan 
             # an exit location if we haven't already and we aren't performing an action
             if self.believes_alarm:
                 if not isinstance(planned_target_agent, FireExit) and not self.planned_action:
@@ -841,3 +843,6 @@ class Human(Agent):
     def set_believes(self, value: bool):
         if value and not self.believes_alarm:
             self.believes_alarm = value
+            
+            
+# Add the new Facilitator class here!

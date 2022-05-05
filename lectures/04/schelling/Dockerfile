@@ -7,10 +7,13 @@ RUN apt-get install git -y
 
 RUN mkdir /mesa
 WORKDIR /mesa
+
+ARG FETCH_REQUIRMENTS=2016-01-01
 RUN svn checkout https://github.com/UniK-INES/mesa/branches/ines_edu/examples/schelling
 
 RUN pip install -r ./schelling/requirements.txt
-RUN echo reinstall
-#RUN pip install -I git+https://github.com/UniK-INES/mesa@ines_edu
+
+ARG FETCH_MODEL=FALSE
+RUN svn checkout https://github.com/UniK-INES/mesa/branches/ines_edu/examples/schelling
 
 CMD python ./schelling/run.py

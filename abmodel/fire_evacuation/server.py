@@ -32,6 +32,9 @@ def fire_evacuation_portrayal(agent):
         else:
             # Normal
             portrayal["Shape"] = "fire_evacuation/resources/human.png"
+            
+    # add facilitator portrayal here!
+    
     elif type(agent) is FireExit:
         portrayal["Shape"] = "fire_evacuation/resources/fire_exit.png"
         portrayal["scale"] = 1
@@ -52,7 +55,7 @@ def fire_evacuation_portrayal(agent):
     return portrayal
 
 # initial extent that will be changed on reset (?)
-canvas_element = CanvasGrid(fire_evacuation_portrayal, 50, 50, 800, 800)
+canvas_element = CanvasGrid(fire_evacuation_portrayal, 30, 30, 700, 700)
 
 # Define the charts on our web interface visualisation
 status_chart = ChartModule(
@@ -65,26 +68,34 @@ status_chart = ChartModule(
 
 mobility_chart = ChartModule(
     [
-        {"Label": "Normal", "Color": "green"},
-        {"Label": "Panic", "Color": "red"},
-        {"Label": "Incapacitated", "Color": "blue"},
+        #{"Label": "Normal", "Color": "green"},
+        {"Label": "AvgNervousness", "Color": "red"},
+        #{"Label": "Incapacitated", "Color": "blue"},
     ]
 )
 
-
-
 # Specify the parameters changeable by the user, in the web interface
 model_params = {
+    "seed": UserSettableParameter(
+        "number", "Random seed", value=1
+    ),
     "floor_size": UserSettableParameter(
-        "slider", "Room size (edge)", value=50, min_value=10, max_value=1000, step=10
+        "slider", "Room size (edge)", value=30, min_value=5, max_value=30, step=1
     ),
     "human_count": UserSettableParameter(
-        "slider", "Number Of Human Agents", value=10, min_value=1, max_value=10000, step=10),
+        "slider", "Number Of Human Agents", value=10, min_value=1, max_value=500, step=5
+    ),
     "random_spawn": UserSettableParameter(
         "checkbox", "Spawn Agents at Random Locations", value=True
     ),
-    "visualise_vision": UserSettableParameter("checkbox", "Show Agent Vision", value=False),
-    "save_plots": UserSettableParameter("checkbox", "Save plots to file", value=True),
+    "max_speed": UserSettableParameter(
+        "slider", "Maximum Speed of agents", value=2, min_value=1, max_value=5, step=1
+    ),
+    "alarm_believers_prop": UserSettableParameter(
+        "slider", "Proportion of Alarm Believers", value=0.9, min_value=0.0, max_value=1.0, step=0.05
+    ),
+    
+    ## add slider for facilitators_percentage    
 }
 
 # Start the visual server with the model

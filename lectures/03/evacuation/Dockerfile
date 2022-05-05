@@ -16,4 +16,5 @@ ARG FETCH_MODEL=FALSE
 RUN svn checkout https://github.com/UniK-INES/edu_introabm_exercise_dev/trunk/abmodel
 #RUN pip install -I git+https://github.com/UniK-INES/mesa@ines_edu
 
-CMD python ./abmodel/run.py
+WORKDIR /mesa/abmodel
+CMD python ./run.py
