@@ -92,7 +92,7 @@ model_params = {
         "slider", "Maximum Speed of agents", value=2, min_value=1, max_value=5, step=1
     ),
     "alarm_believers_prop": UserSettableParameter(
-        "slider", "Proportion of Alarm Believers", value=0.9, min_value=0.0, max_value=1.0, step=0.05
+        "slider", "Proportion of Alarm Believers", value=1.0, min_value=0.0, max_value=1.0, step=0.05
     ),
     
     ## add slider for facilitators_percentage    

@@ -315,7 +315,7 @@ class Human(Agent):
                             visible_neighborhood.add((tile, tuple(visible_contents)))
 
                 except Exception as e:
-                    print(e)
+                    print("get_visible_tiles: " + str(e))
 
         if self.model.visualise_vision:
             self.update_sight_tiles(visible_neighborhood)
@@ -682,8 +682,6 @@ class Human(Agent):
     def move_toward_target(self):
         next_location: Coordinate = None
         pruned_edges = set()
-        # TODO inefficient?
-        #graph = deepcopy(self.model.graph)
         graph = self.model.graph
 
         while self.planned_target[1] and not next_location:

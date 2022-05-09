@@ -81,7 +81,6 @@ class FireEvacuation(Model):
         self.height = floor_size
         self.human_count = human_count
         self.visualise_vision = visualise_vision
-        self.save_plots = save_plots
 
         # Set up model objects
         self.schedule = RandomActivation(self)
@@ -156,10 +155,7 @@ class FireEvacuation(Model):
         # Start placing human agents
         for i in range(0, self.human_count):
             if self.random_spawn:  # Place human agents randomly
-                # pos = self.grid.find_empty()
-                #print(self.grid.empties)
                 pos = tuple(self.rng.choice(tuple(self.grid.empties)))
-                print(pos )
             else:  # Place human agents at specified spawn locations
                 pos = self.rng.choice(self.spawn_pos_list)
 
@@ -202,7 +198,7 @@ class FireEvacuation(Model):
 
                 experience = self.rng.integers(self.MIN_EXPERIENCE, self.MAX_EXPERIENCE)
 
-                belief_distribution = [alarm_believers_prop, 1 - prop_alarm_believers_prop]  # [Believes, Doesn't Believe]
+                belief_distribution = [alarm_believers_prop, 1 - alarm_believers_prop]  # [Believes, Doesn't Believe]
                 believes_alarm = self.rng.choice([True, False], p=belief_distribution)
 
                 # decide here whether to add a facilitator
